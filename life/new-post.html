@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width">
+    <!-- <link rel="icon" href="img/favicon1.ico"> -->
+    <link rel="stylesheet"
+    href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Overpass:200,300|Spectral:300,400,500" rel="stylesheet">
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.2.4.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/styles.css">
+    <script src="../functions.js"></script>
+    <title>New Post</title>
+  </head>
+  <body id="blog-page">
+    <div class="border "></div>
+    <div class="header">
+      <div class="nav">
+        <a class="nav-btn about-btn" href='../about.html'>about</a>
+        <a class="nav-btn portfolio-btn" href='../portfolio.html'>portfolio</a>
+        <div id="logo" class"nav-btn" onclick="window.location.href='../index.html'"><p>e</p></div>
+        <a class="nav-btn services-btn" href='../life.html' style="color:#f7e66a">life</a>
+        <a class="nav-btn contact-btn" href='../contact.html'>contact</a>
+        <span class="stretch"></span>
+      </div>
+    </div>
+    <div class="container fade-in">
+      <h1>new post</h1>
+      <form id="blog-form" action="life.php" method="post">
+        <!-- post type toggle -->
+        <select id="post-type" name="post-type">
+          <option value="creations">creations</option>
+          <option value="stories">stories</option>
+          <option value="music">music</option>
+          <option value="blog">blog</option>
+        </select>
+        <div id="blog-input">
+          <input type="text" id="blog-title" name="blog-title" class="blog-body" placeholder="what are you thinking?" required>
+          <textarea id="blog-text" name="content" class="blog-body" required></textarea>
+        </div>
+        <div id="post-submit">
+          <input type="text" id="blog-password" name="password" placeholder="password" required>
+          <!-- <input type="submit" value="→" id="submit-btn" onclick="passwordVal()"> -->
+          <button type="button" id="submit-btn" onclick="passwordVal()">&rarr;</button>
+        </div>
+
+      </form>
+    </div>
+  </body>
+</html>

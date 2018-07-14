@@ -1,0 +1,163 @@
+<script src=lib2.js></script>
+
+<body bgcolor=black text=white link=white alink=white vlink=white>
+<center>
+<canvas id='canvas1' width=400 height=400></canvas>
+</center>
+</body>
+
+<script id='my_vertex_shader' type='x-shader/x-vertex'>
+   attribute vec3 aPos;
+   varying   vec3 vPos;
+   void main() {
+      gl_Position = vec4(aPos, 1.);
+      vPos = aPos;
+   }
+</script>
+
+<script id='my_fragment_shader' type='x-shader/x-fragment' style="height:90vh">
+uniform float uTime;
+varying vec3 vPos;
+
+
+vec3 ray_trace_sphere(float x, float y, float z, float r) {
+   vec3 L = vec3(.5*sin(5.*uTime),1.,1.);
+   float t;
+   vec3 C = vec3(.5*x, sin(y), z);
+   vec3 V = vec3(0.1, 0.5, cos(z));
+   vec3 W = normalize(vec3(vPos.x, vPos.y, -2.));
+   vec3 P = V - C;
+   float disc = dot(W, P)*dot(W, P) - dot(P, P) + r*r;
+
+
+   if(disc>0.){
+      disc = sqrt(disc);
+      float t1 = -1.*dot(W, P) * disc;
+      float t2 = -1.*dot(W, P) / disc;
+
+      if(t1>0. && t2>0.){
+         t = min(t1, t2);}
+      else if(t1>0. || t2>0.){
+         t = max(t1,t2);}
+      else{
+         return vec3(0.);}
+      vec3 S = V + t*W;
+      return normalize(S - C);
+   }
+
+   else{
+      return vec3(0.);
+   }
+}
+
+vec3 phong_lighting(vec3 N, vec3 L, vec3 W, vec3 A, vec3 D, vec3 S, float p){
+   vec3 R = 2.*dot(L, N) * N - L;
+   vec3 E = -W;
+   float spec = max(0., pow(dot(E, R), p));
+   float diffuse = max(0., pow(dot(N,L),p));
+   vec3 color = 2.*A + 0.5*D*diffuse + S*spec;
+   return color;
+}
+
+void main() {
+   vec3 L = vec3(.5*sin(5.*uTime),1.,1.);
+   vec3 W = normalize(vec3(vPos.x, vPos.y, -2.));
+   vec3 N;
+
+   vec3 N1 = ray_trace_sphere(noise(vec3(sin(2.*uTime), 1.,1.)),cos(.5*uTime), 0., noise(vec3(.5)));
+   vec3 N2 = ray_trace_sphere(pow(cos(2.*uTime),2.),pow(sin(4.*uTime),2.), tan(.5*uTime)-3., .5);
+   N = N1;
+   if (N2.z>N1.z){
+      N = N2;}
+
+   vec3 c = phong_lighting(N, L, W, vec3(noise(vec3(sin(0.1))),-noise(vec3(.05)),0.01), vec3(.2,.01, noise(vec3(.1))), -vec3(.05), 10.);
+
+
+   gl_FragColor = vec4(c*c, 1.0);
+
+ }
+
+</script>
+
+<script id='instructions' type='text/html'><font color=#b0b0b0>
+<a href=http://blog.kenperlin.com>
+<b>Lesson 28: Painting with clouds</b>
+</a>
+<p>
+Once you have the basic texture of clouds<br>
+you can start thinking in a more painterly<br>
+way, varying the density of the clouds<br>
+from top to bottom, and mixing different<br>
+colors to create a complex palette.
+<p>
+We vary the cloud density by replacing<br>
+<font color=white><code>c</code></font>
+with
+<font color=white><code>c + y</code></font>
+inside the
+<font color=white><code>clamp</code></font>
+function.
+<p>
+We create colorful clouds by using
+<font color=white><code>c</code></font> to<br>
+mix
+<font color=white><code>pink</code></font>
+into the
+<font color=white><code>white</code></font>
+before clamping,<br>
+to create the final
+<font color=white><code>cloud</code></font>
+color.
+<p>
+Things to try:
+<p>
+&#x25cf; Place the clouds below, not above, the sky
+<br>
+&#x25cf; Make the clouds slowly drift left to right
+<br>
+&#x25cf; Create a dark and stormy color palette
+</script>
+
+<script>
+var vs = my_vertex_shader.innerHTML,
+    fs = my_fragment_shader.innerHTML;
+    fs = fs.substring(1, fs.length);
+
+document.body.innerHTML = [''
+   ,'<center><font size=6 color=#b0b0b0>Ray Tracing</center>'
+   ,'<TABLE cellspacing=0 cellpadding=0><TR>'
+   ,'<td width=50></td><td><font color=red size=5><div id=errorMessage>&nbsp;</div></font></td>'
+   ,'</TR><TR>'
+   ,'<table cellspacing=10>'
+   ,'<tr>'
+   ,'<td valign=top><font size=2 color=red><div id=errorMarker>&nbsp;</div></font></td>'
+   ,'<td valign=top>'
+   ,'<textArea id=textArea spellcheck=false '
+   ,'style="font:16px courier;outline-width:0;border-style:none;resize:none;overflow:scroll;"'
+   ,'></textArea>'
+   ,'</td><td valign=top>' + document.body.innerHTML + '</td>'
+   ,'<td valign=top><font size=5>' + instructions.innerHTML + '</td>'
+   ,'</tr></table>'
+   ,'</TR></TABLE>'
+   ].join('');
+
+var i, text = fs.split('\n'), cols = 0;
+for (i = 0 ; i < text.length ; i++)
+   cols = Math.max(cols, text[i].length);
+
+textArea.rows = text.length;
+textArea.cols = cols;
+textArea.value = fs;
+textArea.style.backgroundColor = '#202020';
+textArea.style.color = 'white';
+textArea.onkeyup = function() { canvas1.setShaders(vs, this.value); }
+
+var startTime = Date.now();
+
+function animate(gl) {
+   let time = (Date.now() - startTime) / 1000;
+   setUniform('1f', 'uTime', time);
+}
+
+gl_start(canvas1, vs, fs);
+</script>
